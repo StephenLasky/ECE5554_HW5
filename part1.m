@@ -1,15 +1,9 @@
-numTrainIms = 250;
-numTestIms = 50;
+numTrainIms = 1000;
+numTestIms = 200;
 ims = generateImageCells(numTrainIms, 'train/');        % to generate
 nBins = 12;
 nCategories = 8;
 load('gs.mat');
-% figure(); imshow(ims{2});   % to show
-
-% im = ims{1};
-% s = size(im);
-% imv = reshape(im, s(1)*s(2), 3);    % reshape to vector
-% % im = [1 2 5 8 4 1 8 6 4 2 6];
 
 %%%  STEP 1: 'TRAINING' PART %%%
 % compute the avareage of each cluster center
