@@ -1,9 +1,9 @@
 % numTrainIms = 1888;
 % numTestIms = 800;
 
-numTrainIms = 100;
+numTrainIms = 250;
 numTestIms = 50;
-k = 25;
+k = 50;
 siftDimensions = 128;
 numKMiter = 10;
 numCategories = 8;
@@ -113,13 +113,41 @@ end
 
 % now generate trainX
 % trainX is k x numTrainIms
-trainX = zeros(k,numTrainIms, 'single');
+trainX = zeros(5*k,numTrainIms, 'single');  % multiply by 5 now because we quadrants + whole
 for im_num = 1:numTrainIms
+    % compute img size for quadrants (later on)
+    [sizeX, sizeY, sizeZ] = size(ims{im_num});
+    
+    % get the position of the relevant descriptors (later on)
+    descriptorInfo = train_F(im_num);
+    descriptorInfo = single(descriptorInfo{1,1});
+    
     for d = 1:numDescriptors(im_num)
         c = dictionary(im_num, d);
         trainX(c,im_num) = trainX(c,im_num) + 1;
         
+        % now do quadrants
+        % for train_F: first element is X, second element is Y
+        % we know which cluster this element belongs to
+        % for each quadrant: (1) determine if belongs in (2) add
+        x = descriptorInfo(1,d);
+        y = descriptorInfo(2,d);
         
+        % determine the quadrants
+        if x <= sizeX / 2 && y <= sizeY / 2
+            quadrant = 1;   % top left
+        elseif x > sizeX / 2 && y <= sizeY / 2
+            quadrant = 2;   % top right
+        elseif x <= sizeX / 2 && y > sizeY / 2
+            quadrant = 3;   % bottom left
+        else
+            quadrant = 4;    % bottom right
+        end
+        
+        % this will be the standard offset we use for placement into trainX
+        % as well as testX
+        offset = k * quadrant;
+        trainX(c + offset, im_num) = trainX(c + offset, im_num) + 1;
     end
 end
 
@@ -127,6 +155,9 @@ end
 trainY = train_gs(1:numTrainIms);
 
 % BEGIN: classify test images
+% get the testing images
+ims = generateImageCells(numTestIms, 'test/');        % to generate
+
 % start by filling in testX
 testX = zeros(5*k,numTestIms,'single'); % multiply by 5 now because we quadrants + whole
 testY = zeros(1,numTestIms);
@@ -162,14 +193,14 @@ for im_num = 1:numTestIms
         y = descriptorInfo(2,d);
         
         % determine the quadrants
-        if x <= sizeX / 2 && y <= size / 2
+        if x <= sizeX / 2 && y <= sizeY / 2
             quadrant = 1;   % top left
-        elseif x > sizeX / 2 && y <= size / 2
+        elseif x > sizeX / 2 && y <= sizeY / 2
             quadrant = 2;   % top right
-        elseif x <= sizeX / 2 && y > size / 2
+        elseif x <= sizeX / 2 && y > sizeY / 2
             quadrant = 3;   % bottom left
         else
-            quadrant = 4    % bottom right
+            quadrant = 4;    % bottom right
         end
         
         % this will be the standard offset we use for placement into trainX

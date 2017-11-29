@@ -1,5 +1,5 @@
-numTrainIms = 1888;
-numTestIms = 800;
+numTrainIms = 250;
+numTestIms = 50;
 ims = generateImageCells(numTrainIms, 'train/');        % to generate
 nBins = 12;
 nCategories = 8;
